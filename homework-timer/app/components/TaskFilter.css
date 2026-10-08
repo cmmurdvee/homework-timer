@@ -1,0 +1,56 @@
+.task-filter-container {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .task-filter-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e1;
+    font-size: 0.875rem;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    border-color: #3b82f6;
+}
+
+.sort-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.sort-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+.sort-select {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e1;
+    font-size: 0.875rem;
+    color: #334155;
+    background-color: #ffffff;
+    outline: none;
+}
