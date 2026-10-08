@@ -4,7 +4,7 @@ import { TimerError } from "@/lib/timer";
 
 function logDatabaseError(action, error) {
   console.error(`Supabase ${action} task error:`, error);
-  return jsonResponse({ error: error.message }, 500);
+  return jsonResponse({ error: "Database request failed" }, 500);
 }
 
 function logApiError(action, error) {
@@ -12,10 +12,7 @@ function logApiError(action, error) {
     return jsonResponse({ error: error.message }, error.status);
   }
   console.error(`${action} task API failed:`, error);
-  return jsonResponse(
-    { error: error.message || "Internal Server Error" },
-    500,
-  );
+  return jsonResponse({ error: "Internal Server Error" }, 500);
 }
 
 function taskId(input) {
@@ -35,6 +32,9 @@ export async function createTask(request) {
     if (!title) {
       return jsonResponse({ error: "Title is required" }, 400);
     }
+    if (title.length > 100) {
+      return jsonResponse({ error: "Title must be at most 100 characters" }, 400);
+    }
 
     if (
       input.description !== undefined &&
@@ -46,12 +46,19 @@ export async function createTask(request) {
         400,
       );
     }
+    const description = input.description?.trim() || null;
+    if (description && description.length > 500) {
+      return jsonResponse(
+        { error: "Description must be at most 500 characters" },
+        400,
+      );
+    }
 
     const { data, error } = await getSupabaseClient()
       .from(getTaskTableName())
       .insert({
         title,
-        description: input.description ?? null,
+        description,
         status: "idle",
       })
       .select("*")

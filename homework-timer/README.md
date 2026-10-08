@@ -53,7 +53,7 @@ create/list/start/end/delete request shapes:
 
 - `POST /api/create-task` with `{ "title": "...", "description": "..." }` creates
   an idle task and returns the task object.
-- `GET /api/get-task` returns an array of tasks, newest first.
+- `GET /api/get-tasks` returns an array of tasks, newest first.
 - `POST /api/start-timer` with `{ "id": "..." }` sets `start_time` and status
   `running`, then returns the updated task.
 - `POST /api/end-timer` with `{ "id": "..." }` sets `end_time` and status
