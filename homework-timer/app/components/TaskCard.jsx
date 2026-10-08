@@ -28,29 +28,31 @@ const formatTime = (isoString) => {
 };
 
 export default function TaskCard({ task, onStart, onEnd, onDelete }) {
-    const [elapsed, setElapsed] = useState(0);
+    const [now, setNow] = useState(0);
+
+    const startMs = task.start_time ? new Date(task.start_time).getTime() : null;
+    const endMs = task.end_time ? new Date(task.end_time).getTime() : null;
+    const isRunning = task.status === 'running' && startMs;
 
     useEffect(() => {
-        let interval = null;
+        if (!isRunning) return;
 
-        const startMs = task.start_time ? new Date(task.start_time).getTime() : null;
-        const endMs = task.end_time ? new Date(task.end_time).getTime() : null;
-
-        if (task.status === 'running' && startMs) {
-            setElapsed(Date.now() - startMs);
-            interval = setInterval(() => {
-                setElapsed(Date.now() - startMs);
-            }, 1000);
-        } else if (task.status === 'completed' && startMs && endMs) {
-            setElapsed(endMs - startMs);
-        } else {
-            setElapsed(0);
-        }
+        const tick = () => setNow(Date.now());
+        const first = setTimeout(tick, 0);
+        const interval = setInterval(tick, 1000);
 
         return () => {
-            if (interval) clearInterval(interval);
+            clearTimeout(first);
+            clearInterval(interval);
         };
-    }, [task.status, task.start_time, task.end_time]);
+    }, [isRunning]);
+
+    let elapsed = 0;
+    if (isRunning && now) {
+        elapsed = now - startMs;
+    } else if (task.status === 'completed' && startMs && endMs) {
+        elapsed = endMs - startMs;
+    }
 
     return (
         <div className="task-card">

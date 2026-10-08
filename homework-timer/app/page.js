@@ -26,22 +26,18 @@ export default function Home() {
   const [error, setError] = useState('');
   const [now, setNow] = useState(0);
 
-  // Fetch tasks from /api/get-tasks
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch('/api/get-tasks');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setTasks(data);
-      setError('');
-    } catch (err) {
-      console.error('Failed to fetch tasks:', err);
-      setError('Could not load tasks.');
-    }
-  };
-
+  // Load tasks from /api/get-tasks once on page load
   useEffect(() => {
-    fetchTasks();
+    fetch('/api/get-tasks')
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        setTasks(data);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch tasks:', err);
+        setError('Could not load tasks.');
+      });
   }, []);
 
   // Add Task
