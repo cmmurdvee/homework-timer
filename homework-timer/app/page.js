@@ -6,21 +6,37 @@ import TaskCard from './components/TaskCard';
 import TaskFilter from './components/TaskFilter';
 import './page.css';
 
+const getElapsedTime = (task, now) => {
+  const startMs = task.start_time ? new Date(task.start_time).getTime() : 0;
+  const endMs = task.end_time ? new Date(task.end_time).getTime() : 0;
+
+  if (task.status === 'completed' && startMs && endMs) {
+    return endMs - startMs;
+  }
+  if (task.status === 'running' && startMs) {
+    return now - startMs;
+  }
+  return 0;
+};
+
 export default function Home() {
   const [tasks, setTasks] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('newest');
+  const [error, setError] = useState('');
+  const [now, setNow] = useState(0);
 
   // Fetch tasks from /api/get-tasks
   const fetchTasks = async () => {
     try {
       const res = await fetch('/api/get-tasks');
       const data = await res.json();
-      if (res.ok) {
-        setTasks(data);
-      }
+      if (!res.ok) throw new Error(data.error);
+      setTasks(data);
+      setError('');
     } catch (err) {
       console.error('Failed to fetch tasks:', err);
+      setError('Could not load tasks.');
     }
   };
 
@@ -37,11 +53,14 @@ export default function Home() {
         body: JSON.stringify({ title, description }),
       });
       const newTask = await res.json();
-      if (res.ok) {
-        setTasks((prev) => [newTask, ...prev]);
-      }
+      if (!res.ok) throw new Error(newTask.error);
+      setTasks((prev) => [newTask, ...prev]);
+      setError('');
+      return true;
     } catch (err) {
       console.error('Failed to create task:', err);
+      setError('Could not save the task.');
+      return false;
     }
   };
 
@@ -54,11 +73,12 @@ export default function Home() {
         body: JSON.stringify({ id }),
       });
       const updatedTask = await res.json();
-      if (res.ok) {
-        setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
-      }
+      if (!res.ok) throw new Error(updatedTask.error);
+      setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
+      setError('');
     } catch (err) {
       console.error('Error starting timer:', err);
+      setError('Could not start the timer.');
     }
   };
 
@@ -71,11 +91,12 @@ export default function Home() {
         body: JSON.stringify({ id }),
       });
       const updatedTask = await res.json();
-      if (res.ok) {
-        setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
-      }
+      if (!res.ok) throw new Error(updatedTask.error);
+      setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
+      setError('');
     } catch (err) {
       console.error('Error ending timer:', err);
+      setError('Could not stop the timer.');
     }
   };
 
@@ -87,26 +108,29 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-      if (res.ok) {
-        setTasks((prev) => prev.filter((t) => t.id !== id));
-      }
+      if (!res.ok) throw new Error('Delete failed');
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setError('');
     } catch (err) {
       console.error('Error deleting task:', err);
+      setError('Could not delete the task.');
     }
   };
 
-  const getElapsedTime = (task) => {
-    const startMs = task.start_time ? new Date(task.start_time).getTime() : 0;
-    const endMs = task.end_time ? new Date(task.end_time).getTime() : 0;
+  // Running timers change every second, so re-sort while sorting by time
+  const isTimeSort = sortOption.startsWith('time');
+  const hasRunning = tasks.some((t) => t.status === 'running');
 
-    if (task.status === 'completed' && startMs && endMs) {
-      return endMs - startMs;
-    }
-    if (task.status === 'running' && startMs) {
-      return Date.now() - startMs;
-    }
-    return 0;
-  };
+  useEffect(() => {
+    if (!isTimeSort || !hasRunning) return;
+    const tick = () => setNow(Date.now());
+    const first = setTimeout(tick, 0);
+    const interval = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(interval);
+    };
+  }, [isTimeSort, hasRunning]);
 
   const filteredAndSortedTasks = useMemo(() => {
     return tasks
@@ -120,23 +144,25 @@ export default function Home() {
           case 'title-desc':
             return b.title.localeCompare(a.title);
           case 'time-desc':
-            return getElapsedTime(b) - getElapsedTime(a);
+            return getElapsedTime(b, now) - getElapsedTime(a, now);
           case 'time-asc':
-            return getElapsedTime(a) - getElapsedTime(b);
+            return getElapsedTime(a, now) - getElapsedTime(b, now);
           case 'newest':
           default:
             return 0;
         }
       });
-  }, [tasks, searchQuery, sortOption]);
+  }, [tasks, searchQuery, sortOption, now]);
 
   return (
     <div className="app-container">
       <div className="app-wrapper">
         <header className="app-header">
           <h1 className="app-title">Homework Timer</h1>
-          <p className="app-subtitle">Next.js & Supabase Assignment Tracker</p>
+          <p className="app-subtitle">See how long your homework really takes</p>
         </header>
+
+        {error && <p className="error-message">{error}</p>}
 
         <TaskForm onAddTask={handleAddTask} />
 

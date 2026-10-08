@@ -9,7 +9,7 @@ export async function GET() {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Supabase Get Tasks Error:', error); // <-- LOGS EXACT REASON
+            console.error('Supabase Get Tasks Error:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 

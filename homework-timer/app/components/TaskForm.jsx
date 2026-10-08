@@ -13,9 +13,11 @@ export default function TaskForm({ onAddTask }) {
     if (!title.trim() || loading) return;
 
     setLoading(true);
-    await onAddTask(title.trim(), description.trim());
-    setTitle('');
-    setDescription('');
+    const saved = await onAddTask(title.trim(), description.trim());
+    if (saved) {
+      setTitle('');
+      setDescription('');
+    }
     setLoading(false);
   };
 
@@ -31,6 +33,7 @@ export default function TaskForm({ onAddTask }) {
           id="title"
           type="text"
           required
+          maxLength={100}
           placeholder="e.g. Physics Homework Chapter 3"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -45,6 +48,7 @@ export default function TaskForm({ onAddTask }) {
         <textarea
           id="description"
           rows={2}
+          maxLength={500}
           placeholder="e.g. Solve problems 10 through 25"
           value={description}
           onChange={(e) => setDescription(e.target.value)}

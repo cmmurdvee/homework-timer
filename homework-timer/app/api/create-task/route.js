@@ -15,7 +15,7 @@ export async function POST(request) {
             .select();
 
         if (error) {
-            console.error('Supabase Create Task Error:', error); // <-- LOGS EXACT REASON
+            console.error('Supabase Create Task Error:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
