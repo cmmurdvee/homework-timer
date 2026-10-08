@@ -9,13 +9,19 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.0"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true
   }
 }

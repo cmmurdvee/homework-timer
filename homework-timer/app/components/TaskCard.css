@@ -1,0 +1,127 @@
+.task-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.task-card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.delete-btn:hover {
+    color: #ef4444;
+}
+
+.task-card-desc {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.task-card-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.timing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.timing-label {
+    display: block;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.elapsed-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    background-color: #f8fafc;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.elapsed-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.elapsed-value {
+    font-family: monospace;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.action-btn {
+    width: 100%;
+    font-weight: 600;
+    padding: 0.625rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: #ffffff;
+}
+
+.action-btn-start {
+    background-color: #10b981;
+}
+
+.action-btn-start:hover {
+    background-color: #059669;
+}
+
+.action-btn-end {
+    background-color: #f43f5e;
+}
+
+.action-btn-end:hover {
+    background-color: #e11d48;
+}
+
+.completed-badge {
+    width: 100%;
+    background-color: #f1f5f9;
+    color: #475569;
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    box-sizing: border-box;
+}

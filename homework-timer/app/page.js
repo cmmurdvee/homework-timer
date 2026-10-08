@@ -1,69 +1,170 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import TaskForm from './components/TaskForm';
+import TaskCard from './components/TaskCard';
+import TaskFilter from './components/TaskFilter';
+import './page.css';
 
 export default function Home() {
+  const [tasks, setTasks] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('newest');
+
+  // Fetch tasks from /api/get-tasks
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch('/api/get-tasks');
+      const data = await res.json();
+      if (res.ok) {
+        setTasks(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // Add Task
+  const handleAddTask = async (title, description) => {
+    try {
+      const res = await fetch('/api/create-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description }),
+      });
+      const newTask = await res.json();
+      if (res.ok) {
+        setTasks((prev) => [newTask, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to create task:', err);
+    }
+  };
+
+  // Start Timer via /api/start-timer
+  const handleStart = async (id) => {
+    try {
+      const res = await fetch('/api/start-timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const updatedTask = await res.json();
+      if (res.ok) {
+        setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
+      }
+    } catch (err) {
+      console.error('Error starting timer:', err);
+    }
+  };
+
+  // End Timer via /api/end-timer
+  const handleEnd = async (id) => {
+    try {
+      const res = await fetch('/api/end-timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const updatedTask = await res.json();
+      if (res.ok) {
+        setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
+      }
+    } catch (err) {
+      console.error('Error ending timer:', err);
+    }
+  };
+
+  // Delete Task
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch('/api/delete-task', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        setTasks((prev) => prev.filter((t) => t.id !== id));
+      }
+    } catch (err) {
+      console.error('Error deleting task:', err);
+    }
+  };
+
+  const getElapsedTime = (task) => {
+    const startMs = task.start_time ? new Date(task.start_time).getTime() : 0;
+    const endMs = task.end_time ? new Date(task.end_time).getTime() : 0;
+
+    if (task.status === 'completed' && startMs && endMs) {
+      return endMs - startMs;
+    }
+    if (task.status === 'running' && startMs) {
+      return Date.now() - startMs;
+    }
+    return 0;
+  };
+
+  const filteredAndSortedTasks = useMemo(() => {
+    return tasks
+      .filter((task) =>
+        task.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => {
+        switch (sortOption) {
+          case 'title-asc':
+            return a.title.localeCompare(b.title);
+          case 'title-desc':
+            return b.title.localeCompare(a.title);
+          case 'time-desc':
+            return getElapsedTime(b) - getElapsedTime(a);
+          case 'time-asc':
+            return getElapsedTime(a) - getElapsedTime(b);
+          case 'newest':
+          default:
+            return 0;
+        }
+      });
+  }, [tasks, searchQuery, sortOption]);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="app-container">
+      <div className="app-wrapper">
+        <header className="app-header">
+          <h1 className="app-title">Homework Timer</h1>
+          <p className="app-subtitle">Next.js & Supabase Assignment Tracker</p>
+        </header>
+
+        <TaskForm onAddTask={handleAddTask} />
+
+        <TaskFilter
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortOption={sortOption}
+          onSortChange={setSortOption}
         />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.js</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        {filteredAndSortedTasks.length === 0 ? (
+          <div className="empty-state">
+            No tasks found. Create one above to get started!
+          </div>
+        ) : (
+          <div className="tasks-grid">
+            {filteredAndSortedTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onStart={handleStart}
+                onEnd={handleEnd}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
