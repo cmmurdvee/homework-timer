@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --experimental-default-type=module --test",
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
