@@ -19,7 +19,8 @@ create table if not exists public.tasks (
   start_time timestamptz,
   end_time timestamptz,
   created_at timestamptz not null default now(),
-  constraint tasks_title_not_blank check (length(trim(title)) > 0),
+  constraint tasks_title_length check (length(trim(title)) between 1 and 100),
+  constraint tasks_description_length check (description is null or length(description) <= 500),
   constraint tasks_valid_status check (status in ('idle', 'running', 'completed'))
 );
 
